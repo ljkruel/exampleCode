@@ -1,0 +1,299 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>homePage</title>
+
+    <!-- WinJS references -->
+    <link href="//Microsoft.WinJS.2.0/css/ui-light.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.2.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.2.0/js/ui.js"></script>
+
+    <link href="/css/default.css" rel="stylesheet" />
+    <link href="/pages/home/home.css" rel="stylesheet" />
+    <script src="/pages/home/home.js"></script>
+
+    <style>
+        .nodes {
+            fill: red;
+
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+        }
+
+        * {
+            font: 10px sans-serif;
+        }
+
+        .bars {
+            stroke: aquamarine;
+            fill: aquamarine;
+            fill-opacity: 0.5;
+        }
+
+        .charts {
+            display:inline-block;
+
+        }
+        .ptCircle {
+            fill: aquamarine;
+            stroke: black;
+        }
+        
+        
+    </style>
+
+</head>
+<body>
+    <!-- The content that will be loaded and displayed. -->
+    <div class="fragment homepage">
+        <header aria-label="Header content" role="banner">
+            <button data-win-control="WinJS.UI.BackButton"></button>
+            <h1 class="titlearea win-type-ellipsis">
+                <span class="pagetitle">Welcome to infoGraphicTrials!</span>
+            </h1>
+        </header>
+        <section aria-label="Main content" role="main">
+            <h1>D3 Bar type charts</h1>
+            <p>A variety of charts using variations of the d3.scale.ordinal() scale type</p>
+            <div>
+                <h2>Bar charts</h2>
+                <div id="chart1" class="charts"><p>Default no padding</p></div>
+                <div id="chart2" class="charts"><p>With padding</p></div>
+                <div id="chart3" class="charts"><p>With padding but no outer padding</p></div>
+            </div>
+            <div>
+                <h2>Dot charts</h2>
+                <div id="chart4" class="charts"><p>Default without padding</p></div>
+                <div id="chart5" class="charts"><p>With padding set to 1</p></div>
+            </div>
+            <div>
+                <div id="chart6" class="charts"><p>Text inside bars</p></div>
+            </div>
+            <div id="dataArea"></div>
+        </section>
+    
+    <script src="../../js/d3.min.js"></script>
+    <script>
+
+        var margin = {top: 10, bottom: 10, left: 50, right: 10};
+        var size   = {width: 200, height: 200};
+
+        var data = [{ name: "red", value: 20 },
+                    { name: "yellow", value: 10 },
+                    { name: "green", value: 30 },
+                    { name: "blue", value: 20 }];
+
+        drawChart1("#chart1");
+        drawChart2("#chart2");
+        drawChart3("#chart3");
+        drawChart4("#chart4");
+        drawChart5("#chart5");
+        drawChart6("#chart6");
+
+        function drawChart1(elId) {
+
+            var myChart = d3.select(elId).append("svg").attr("width", size.width + margin.left + margin.right).attr("height", size.height + margin.bottom + margin.top)
+                                               .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var xScale = d3.scale.linear().range([0, size.width]).domain([0, d3.max(data, function (d) { return d.value; })]);
+            var xAxis = d3.svg.axis().scale(xScale).orient("top");
+
+            var yScale = d3.scale.ordinal().domain(data.map(function (d) { return d.name; })).rangeBands([size.height, 0]);
+            var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+
+            var bars = myChart.append("g").selectAll(".bars").data(data);
+            bars.enter().append("rect")
+                            .attr("class", "bars")
+                            .attr("y", function (d) {
+                                return yScale(d.name);
+                            })
+                            .attr("x", 0)
+                            .attr("height", function () { return yScale.rangeBand(); })
+                            .attr("width", function (d) {
+                                return xScale(d.value);
+                            });
+
+            myChart.append("g").attr("class", "y axis").call(yAxis);
+            myChart.append("g").attr("class", "x axis").call(xAxis);
+        }
+
+        function drawChart2(elId) {
+
+            var myChart = d3.select(elId).append("svg").attr("width", size.width + margin.left + margin.right).attr("height", size.height + margin.bottom + margin.top)
+                                               .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var xScale = d3.scale.linear().range([0, size.width]).domain([0, d3.max(data, function (d) { return d.value; })]);
+            var xAxis = d3.svg.axis().scale(xScale).orient("top");
+
+            var yScale = d3.scale.ordinal().domain(data.map(function (d) { return d.name; })).rangeBands([size.height, 0], 0.5);
+            var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+
+            var bars = myChart.append("g").selectAll(".bars").data(data);
+            bars.enter().append("rect")
+                            .attr("class", "bars")
+                            .attr("y", function (d) {
+                                return yScale(d.name);
+                            })
+                            .attr("x", 0)
+                            .attr("height", function () { return yScale.rangeBand(); })
+                            .attr("width", function (d) {
+                                return xScale(d.value);
+                            });
+
+            myChart.append("g").attr("class", "y axis").call(yAxis);
+            myChart.append("g").attr("class", "x axis").call(xAxis);
+        }
+
+        function drawChart3(elId) {
+
+            var myChart = d3.select(elId).append("svg").attr("width", size.width + margin.left + margin.right).attr("height", size.height + margin.bottom + margin.top)
+                                               .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var xScale = d3.scale.linear().range([0, size.width]).domain([0, d3.max(data, function (d) { return d.value; })]);
+            var xAxis = d3.svg.axis().scale(xScale).orient("top");
+
+            var yScale = d3.scale.ordinal().domain(data.map(function (d) { return d.name; })).rangeBands([size.height, 0], 0.5, 0);
+            var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+
+            var bars = myChart.append("g").selectAll(".bars").data(data);
+            bars.enter().append("rect")
+                            .attr("class", "bars")
+                            .attr("y", function (d) {
+                                return yScale(d.name);
+                            })
+                            .attr("x", 0)
+                            .attr("height", function () { return yScale.rangeBand(); })
+                            .attr("width", function (d) {
+                                return xScale(d.value);
+                            });
+
+            myChart.append("g").attr("class", "y axis").call(yAxis);
+            myChart.append("g").attr("class", "x axis").call(xAxis);
+        }
+
+        function drawChart4(elId) {
+
+            var myChart = d3.select(elId).append("svg").attr("width", size.width + margin.left + margin.right).attr("height", size.height + margin.bottom + margin.top)
+                                               .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var xScale = d3.scale.linear().range([0, size.width]).domain([0, d3.max(data, function (d) { return d.value; })]);
+            var xAxis = d3.svg.axis().scale(xScale).orient("top");
+
+            var yScale = d3.scale.ordinal().domain(data.map(function (d) { return d.name; })).rangePoints([size.height, 0]);
+            var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+
+            var bars = myChart.append("g").selectAll(".bars")
+                                .data(data)
+                                    .enter().append("g").attr("class", "ptCircle");
+
+
+            bars.append("line")
+                            .attr("y1", function (d) {
+                                return yScale(d.name);
+                            })
+                            .attr("x1", 0)
+                            .attr("y2", function (d) { return yScale(d.name); })
+                            .attr("x2", function (d) {
+                                return xScale(d.value);
+                            });
+            bars.append("circle")
+                            .attr("cy", function (d) {
+                                return yScale(d.name);
+                            })
+                            .attr("cx", function (d) {
+                                return xScale(d.value);
+                            })
+                            .attr("r", 5);
+
+            myChart.append("g").attr("class", "y axis").call(yAxis);
+            myChart.append("g").attr("class", "x axis").call(xAxis);
+        }
+
+        function drawChart5(elId) {
+
+            var myChart = d3.select(elId).append("svg").attr("width", size.width + margin.left + margin.right).attr("height", size.height + margin.bottom + margin.top)
+                                               .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var xScale = d3.scale.linear().range([0, size.width]).domain([0, d3.max(data, function (d) { return d.value; })]);
+            var xAxis = d3.svg.axis().scale(xScale).orient("top");
+
+            var yScale = d3.scale.ordinal().domain(data.map(function (d) { return d.name; })).rangePoints([size.height, 0], 1);
+            var yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+
+            var bars = myChart.append("g").selectAll(".bars")
+                                .data(data)
+                                    .enter().append("g").attr("class", "ptCircle");
+
+
+            bars.append("line")
+                            .attr("y1", function (d) {
+                                return yScale(d.name);
+                            })
+                            .attr("x1", 0)
+                            .attr("y2", function (d) { return yScale(d.name); })
+                            .attr("x2", function (d) {
+                                return xScale(d.value);
+                            });
+            bars.append("circle")
+                            .attr("cy", function (d) {
+                                return yScale(d.name);
+                            })
+                            .attr("cx", function (d) {
+                                return xScale(d.value);
+                            })
+                            .attr("r", 5);
+
+            myChart.append("g").attr("class", "y axis").call(yAxis);
+            myChart.append("g").attr("class", "x axis").call(xAxis);
+        }
+
+        function drawChart6(elId) {
+
+            var myChart = d3.select(elId).append("svg").attr("width", size.width + margin.left + margin.right).attr("height", size.height + margin.bottom + margin.top)
+                                               .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var xScale = d3.scale.linear().range([0, size.width]).domain([0, d3.max(data, function (d) { return d.value; })]);
+            var xAxis = d3.svg.axis().scale(xScale).orient("top");
+
+            var yScale = d3.scale.ordinal().domain(data.map(function (d) { return d.name; })).rangeBands([size.height, 0], 0.5);
+            var yAxis = d3.svg.axis().scale(yScale).orient("right");
+
+
+            var bars = myChart.append("g").selectAll(".bars").data(data);
+            bars.enter().append("rect")
+                            .attr("class", "bars")
+                            .attr("y", function (d) {
+                                return yScale(d.name);
+                            })
+                            .attr("x", 0)
+                            .attr("height", function () { return yScale.rangeBand(); })
+                            .attr("width", function (d) {
+                                return xScale(d.value);
+                            });
+
+            myChart.append("g").attr("class", "y axis").call(yAxis);
+            myChart.append("g").attr("class", "x axis").call(xAxis);
+        }
+
+        var dataTable = document.querySelector("#dataArea");
+        var dataString = "";
+        data.forEach(function (d) {
+            dataString = dataString + d.name + "/t" + d.value;
+        });
+        dataTable.innerHTML = dataString;
+
+
+    </script>
+    </div>
+</body>
+</html>

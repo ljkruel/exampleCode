@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Line charts</title>
+
+    <style>
+        .line {
+            fill: none;
+            stroke: black;      
+        }
+
+        .charts {
+            outline: 1px solid gray;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Experiments with line charts</h1>
+    </header>
+    <section id="line1">
+        <div class="charts"></div>
+        <code class="charts">blah</code>
+        <p>A basic line</p>
+    </section>
+    <script src="../../js/d3.min.js"></script>
+    <script src="../../js/jquery-2.1.1.min.js"></script>
+    
+    <script>
+
+        var tmp = d3.svg.axis();
+
+        var margin = { top: 10, bottom: 10, left: 50, right: 10 };
+        var size = { width: 200, height: 200 };
+
+        var data = [{ name: "red", value: 20 },
+                    { name: "yellow", value: 10 },
+                    { name: "green", value: 30 },
+                    { name: "blue", value: 20 }];
+
+
+        displayFunction("line1", drawBasicLine);
+
+        function drawBasicLine(elId) {
+            var lineExample = d3.select(elId).append("svg").attr("width", size.width + margin.left + margin.right).attr("heigth", size.height + margin.top + margin.bottom)
+                                             .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var lineGenerator = d3.svg.line();
+
+            var pts = [[10, 10], [20, 8], [30, 20], [40, 10], [50, 15]]
+
+            var str = lineGenerator(pts);
+
+            lineExample.append("path").datum(pts).attr("class", "line").attr("d", lineGenerator);
+        }
+
+
+        function displayFunction(elId, theFunction) {
+            theFunction("#" + elId + " div");
+            document.querySelector("#" + elId + " code").innerHTML = theFunction;
+
+        }
+    </script>
+
+</body>
+</html>
