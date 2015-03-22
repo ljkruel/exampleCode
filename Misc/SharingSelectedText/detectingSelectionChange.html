@@ -9,18 +9,98 @@
     
 
     <title>Detecting when the user highlights a portion of text</title>
+    <style>
+        #buttons {
+            position:absolute;
+            z-index:99;
+            visibility: collapse;
+        
+        }
+
+        .img-thumbnail {
+            height: 75px;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Detecting when the user highlights a portion of text</h1>
-    </header>
-    <article>
-        <p>The Guardian website has a nice feature where when the user selects / hightligths a section of text, buttons appear, allowing the user to quick mail or twit the text.</p>
-        <img src="TheGuardianSharingSelection.PNG" alt="Screen grab from the guardian showing this feature" />
-        <p>I found the code! The Guardian UI is on Github... The Guardian is very liberal. See:
-            <a href="frontend/static/src/javascripts/projects/common/modules/ui/selection-sharing.js">TheGuardian UI in GitHub</a>
-        </p>
-        <p>This is my version.</p>
-    </article>
+    <div class="container">
+        <header>
+            <h1>Detecting when the user highlights a portion of text</h1>
+        </header>
+        <article>
+            <p>The Guardian website has a nice feature where when the user selects / hightligths a section of text, buttons appear, 
+            allowing the user to quick mail or twit the text. I thought it interesting to try and recreate this feature as a test.</p>
+            <p>
+                I have since found the code! The Guardian UI is on Github... The Guardian is very liberal with what it produces. See:
+                <a href="https://github.com/guardian/frontend/static/src/javascripts/projects/common/modules/ui/selection-sharing.js">TheGuardian UI in GitHub</a>
+            </p>
+            <img src="TheGuardianSharingSelection.PNG" class="img-thumbnail" alt="Screen grab from the guardian showing this feature" />
+            <img src="SelectionSharingExample.PNG" class="img-thumbnail" alt="Screen grab from my version" />
+
+         </article>
+        <article>
+            <h2>Try selecting text on this page.</h2>
+
+            
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus commodo mattis pretium. Proin porta finibus nibh in malesuada. Integer elementum leo vel blandit molestie. Praesent non nisi vitae nisl varius porta. Sed ac sagittis orci. Quisque vestibulum, elit sed ornare tempus, ex turpis pharetra lorem, eget auctor massa nibh eu libero. In quis pellentesque tellus, vitae bibendum purus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Cras ligula elit, tempus quis lectus ac, posuere pharetra neque. Suspendisse potenti. Maecenas dolor nunc, elementum pellentesque eros blandit, vulputate facilisis lacus.</p>
+            <p>Fusce auctor lobortis justo, et pharetra mi egestas nec. Vivamus eu mauris eros. Curabitur varius, ligula et tincidunt dictum, justo sem venenatis velit, ac hendrerit magna felis id quam. Cras sed quam sed elit viverra ultricies. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Morbi sed nulla tristique, convallis erat et, porttitor lorem. Duis felis lorem, condimentum quis auctor eget, tempor fringilla nunc. Vivamus pharetra mauris non neque bibendum porttitor. Pellentesque id nulla nulla. Ut maximus odio eros, in dictum mi porttitor non. Morbi rutrum consequat leo, at faucibus justo aliquam nec. Aliquam elit arcu, ultrices at pretium ac, facilisis vitae neque.</p>
+            <p>Praesent ex felis, molestie non nisl ut, sollicitudin gravida dui. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nulla sed mauris eu ex sagittis pharetra id ut libero. Quisque quis molestie ligula. Donec et nisi ligula. Praesent feugiat rutrum neque, a feugiat tortor pharetra sit amet. Suspendisse rutrum ut neque nec porttitor.</p>
+            <p>Mauris sit amet gravida mauris. Cras neque felis, fringilla ut neque in, pretium ultrices purus. Phasellus ullamcorper lacinia porta. Donec bibendum diam ut dui luctus sagittis. In suscipit quam quam, id vulputate orci mattis ac. Praesent et sem non nisl cursus scelerisque. Curabitur eu ex nec lacus blandit suscipit. Suspendisse efficitur id mi nec vestibulum. Ut faucibus hendrerit ex ut fringilla. Nulla et tempus ligula. Aenean a luctus nunc.</p>
+            <p>Sed a est non est sollicitudin porttitor vestibulum ac dolor. Aenean pretium ultricies mi vel porta. Curabitur tempus, velit ac vestibulum pretium, magna lorem finibus ante, elementum fermentum mauris orci nec ipsum. Phasellus luctus justo sit amet metus tristique, sed fringilla nibh cursus. Donec euismod, justo non facilisis molestie, orci lectus venenatis lectus, sed eleifend justo est vitae nisl. Nunc eget metus imperdiet, tincidunt nisi dignissim, sodales diam. Ut in commodo lorem. Aenean tincidunt tempor ante in faucibus. Phasellus quis nisl feugiat, maximus lorem eu, placerat magna. Nam porta turpis id eros maximus, eget tincidunt justo hendrerit. Etiam viverra est at mi consequat dignissim. Donec ullamcorper lorem a dignissim molestie. Vivamus malesuada semper lectus ac vehicula.</p>
+        </article>
+        <aside>
+            <h1>Lessons learnt:</h1>
+            <ul>
+                <li>onselect event only fires for input and textarea elements</li>
+                <li>window.pageYOffset == window.scrollY but IE does not support window.scrollY</li>
+                <li>the body element does not fire "click" event</li>
+            </ul>
+        </aside>
+    </div>
+    <div id="buttons">
+        <button class="btn btn-primary">Click</button>
+    </div>
+
+    
+    <script>
+
+        document.body.addEventListener("mouseup", handleSelectionChange);
+        document.body.addEventListener("mousedown", handleSelectionChange);
+        document.body.addEventListener("keyup", handleSelectionChange);
+        document.body.addEventListener("keydown", handleSelectionChange);
+        window.addEventListener("resize", handleSelectionChange);
+
+        document.querySelector("#buttons button").addEventListener("click", buttonClick);
+
+        function handleSelectionChange(ev) {
+
+            if (window.Selection
+                && window.getSelection()
+                && window.getSelection().rangeCount != 0
+                && window.getSelection().toString().length != 0) {
+
+                var selection = window.getSelection();
+                var range = selection.getRangeAt(0);
+                var rect = range.getBoundingClientRect();
+                var screenYOffset = rect.top + window.pageYOffset + rect.height;
+                var screenXOffset = rect.left + window.pageXOffset;
+
+                document.querySelector("#buttons").style.top = screenYOffset + "px";
+                document.querySelector("#buttons").style.left = screenXOffset + "px";
+                document.querySelector("#buttons").style.visibility = "visible";
+            }
+            else {
+                document.querySelector("#buttons").style.visibility = "collapse";
+            }
+
+
+        }
+
+        function buttonClick() {
+            alert(window.getSelection().toString());
+        }
+    </script>
+        
+    
 </body>
 </html>
