@@ -1,0 +1,71 @@
+<!DOCTYPE html> 
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>This page has been created to try out the new VS Code</title>
+		<link rel="stylesheet" href="css/mytest.css"></link>
+	</head>
+	
+	<body>
+		<header>
+			<h1>This page has been created to try out the new VS Code</h1>
+			<img class="screenshot" src="Capture2.png" alt="A screenshot of the new Visual Studio Code tool"></img>
+			<p>
+				This web application has been created in Microsofts new Visual Studio Code tool 
+				as an experiment to see how it works and if it is any good.
+			</p>
+		</header>
+		<article>
+			<p>Things under investigation:</p>
+			<ul>
+				<li>JavaScript Intelisense</li>
+				<li>HTML and CSS intelisence</li>
+				<li>Working with other libraries like Bootstrap, d3.js etc.</li>
+			</ul>
+			<h2>Conclusion</h2>
+			<p>Initial impressions very positive.</p>
+			<p>Things I like:</p>
+			<ul>
+				<li>Love split screen editor</li>
+				<li>Nice syntax highlighting</li>
+				<li class="not">Intellisense working well</li>
+				<li>Very clean, little Chrome, lots of room for the code</li>
+				<li>Auto save</li>
+				<li>Colours in CSS</li>
+			</ul>
+			<p>Things I don't like:</p>
+			<ul>
+				<li>Configuration editing in JSON - no dialog option - feels like its a gimmic for coders</li>
+				<li>No Inglish spel cheker</li>
+			</ul>
+			<aside>
+				<p>
+					Still need to investigate intellisense...
+				</p>
+			</aside>
+		</article>
+		<article>
+			<h1>Screenshots</h1>
+			<p>
+				<img class="screenshot" src="Capture1.png" alt="Screenshot of VS Code"></img>
+			</p>
+			<p>
+			<img class="screenshot" src="Capture3.png" alt="Screenshot of VS Code, side by side mode"></img>	
+			</p>
+			
+		</article>
+		<article>
+			<p>The SVG blocks below where generated my JavaScript to test out 
+				the intellisense and JavaScript editing.
+			</p>
+			<div id="chartArea"></div>
+		    <div id="chartArea2"></div>
+		</article>
+	</body>
+	<script src="dist/d3.js" type="text/javascript"></script>
+	<script src="js/drawBubbleChart.js"></script>
+	<script src="js/mytest.js"></script>
+	<script>
+		drawBubbleChart("#chartArea2", {});
+	</script>
+</html>

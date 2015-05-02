@@ -1,0 +1,24 @@
+*
+{
+	font-family: sans-serif;
+}
+
+.not{
+	text-decoration: line-through;
+}
+
+svg{
+	outline: 1px dashed gray;
+}
+
+.screenshot{
+	width: 600px;
+
+}
+
+.bubble {
+	fill: cadetblue;
+	fill-opacity: 0.3;
+	stroke: cadetblue;
+	stroke-width: 2px;
+}
