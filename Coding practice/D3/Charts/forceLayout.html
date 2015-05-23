@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head lang="en">
+		<meta charset="utf-8" />
+		<title>Practicing the use of force layouts</title>
+		<style>
+			.chartArea{
+				width: 300px;
+				height: 300px;
+				outline: 1px dashed gray;
+				display: inline-block;
+			}
+			
+			.nodes{
+				fill: cadetblue;
+				fill-opacity: 0.5;
+				stroke: cadetblue;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Practicing the use of force layouts</h1>
+		<p>Trying out the basics of D3 selection, entry, update and transitions.</p>
+		
+		<div class="chartArea" id="chartArea1"></div>
+		<div class="chartArea" id="chartArea2"></div>
+		<script src="../dist/d3.js" charset="utf-8"></script>
+		<script>
+				
+			// set up some random data
+			var data = [
+				{ name: "a", group1: 1, group2: 1 },
+				{ name: "b", group1: 1, group2: 1 },
+				{ name: "c", group1: 1, group2: 1 },
+				{ name: "d", group1: 2, group2: 1 },
+				{ name: "e", group1: 2, group2: 1 },
+				{ name: "f", group1: 2, group2: 1 },
+				{ name: "g", group1: 3, group2: 2 },
+				{ name: "h", group1: 3, group2: 2 },
+				{ name: "i", group1: 3, group2: 2 },
+				{ name: "j", group1: 3, group2: 2 }
+			];
+			
+			data.forEach(function(d) {
+				d.value1 = Math.random() *100;
+				d.value2 = Math.random() *100;
+				d.value3 = Math.random() *100;
+			});
+			
+			var chart1 = d3.select("#chartArea1")
+							.append("svg")
+								.attr("width", 300)
+								.attr("height", 300);
+			
+			
+		var forceLayout1 = d3.layout.force().size([300,300]).nodes(data).on('tick', tick1);
+			
+			var node = chart1.selectAll(".nodes").data(data).enter()
+							.append("circle")
+								.attr("class", "nodes")
+								.attr("r", function(d) { return d.value1;});
+			
+			
+			forceLayout1.start();
+			function tick1() {
+				node.attr("cx", function(d) { return d.x; })
+      				.attr("cy", function(d) { return d.y; });
+			}
+			
+		</script>
+	</body>
+</html>

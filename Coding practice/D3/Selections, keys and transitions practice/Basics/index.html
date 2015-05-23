@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+	<head lang="en">
+		<meta charset="utf-8" />
+		<title>Practicing the basics of D3 entry, exit and update with transitions</title>
+		<style>
+			.chartArea{
+				width: 600px;
+				height: 300px;
+				outline: 1px dashed gray;
+				display: inline-block;
+			}
+			.nodes circle{
+				fill: cadetblue;
+				fill-opacity: 0.3;
+				stroke: black;
+			}
+			.nodes text{
+				fill: black;
+				stroke: none;
+				text-anchor: middle;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Practicing the basics of D3 entry, exit and update with transitions</h1>
+		<p>Trying out the basics of D3 selection, entry, update and transitions.</p>
+			
+		<div id="chartArea1"></div>
+			<button class="randomiseButton" >Randomise</button>
+			<button class="addButton" >Add</button>
+			<button class="removeButton" >Remove</button>
+		<div id="chartArea2"></div>
+		
+		<script src="../../dist/d3.js" charset="utf-8"></script>
+		<script>
+			
+			var counter = 0;
+			
+			document.querySelector(("#chartArea1 ~button.randomiseButton"))
+							.addEventListener("click", function(ev){
+								
+								data.forEach(function(d) {
+									d.value = Math.random() *40;	
+								});
+								
+								drawCirles();
+							});
+			
+			document.querySelector(("#chartArea1 ~button.addButton"))
+				.addEventListener("click", function(ev){
+					
+					data.push({ name: counter++, value: Math.random() * 40 })
+					drawCirles();
+				});
+			
+			document.querySelector(("#chartArea1 ~button.removeButton"))
+				.addEventListener("click", function(ev){
+					
+					data.pop();
+					drawCirles();
+				});
+			
+			var chart = d3.select("#chartArea1")
+							.append("svg")
+								.attr("width", 600)
+								.attr("height", 300);
+			
+			// set up some random data
+			var data = [
+				{ name: "a", value: 10 },
+				{ name: "b", value: 20 },
+				{ name: "c", value: 30 },
+				{ name: "d", value: 40 }
+			];
+		
+			drawCirles();
+		
+			function drawCirles()
+			{
+				var nodes = chart.selectAll(".nodes")
+									.data(data, function(d) {return d.name;});
+										
+				var newNodes = nodes.enter().append("g")
+								.attr("class", "nodes")
+								.attr("transform", function(d) {
+									return "translate(" + d.value *10  + ",150)";
+								})
+								newNodes.append("circle")
+									.attr("r", 10);
+								newNodes.append("text")
+									.text(function(d) { return d.name;});
+									
+
+				nodes.transition(750).attr("transform", function(d) {
+									return "translate(" + d.value *10  + ",150)";
+				});
+				
+				nodes.exit().remove();
+
+			}
+			
+		</script>
+		
+	</body>
+	
+</html>

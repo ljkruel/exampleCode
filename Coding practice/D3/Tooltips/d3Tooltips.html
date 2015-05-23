@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+	<head lang="en">
+		<meta charset="utf-8" />
+		<title>Practicing the basics of D3 entry, exit and update with transitions</title>
+		<style>
+			
+			#tooltip {
+				position: absolute;
+				z-index: 99;
+				border: 2px solid gray;
+				width: 150px;
+				padding: 4px;
+			}
+
+				#tooltip.open {
+					visibility: visible;
+				}
+			
+				#tooltip.closed {
+					visibility: collapse;					
+				}
+			
+			#tooltip .tooltip-header {
+				border-bottom: 1px solid lightgray;
+				font-weight: bold;
+				
+			}
+			
+			#tooltip .tooltip-value {
+				font-weight: bold;
+				float: right;
+			}
+			
+
+			
+			.chartArea{
+				width: 600px;
+				height: 300px;
+				outline: 1px dashed gray;
+				display: inline-block;
+			}
+			.nodes {
+				fill: cadetblue;
+				fill-opacity: 0.3;
+				stroke: black;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<h1>Tooltips in D3</h1>
+		<p>Messing about with tooltips with D3.</p>
+		
+		<p>Replicating: <a href="http://www.nytimes.com/interactive/2012/02/13/us/politics/2013-budget-proposal-graphic.html?_r=0">http://www.nytimes.com/interactive/2012/02/13/us/politics/2013-budget-proposal-graphic.html?_r=0</a></p>
+			
+		<div id="chartArea"></div>
+			
+			<article>
+				<code>
+								#tooltip {
+				position: absolute;
+				z-index: 99;
+				border: 2px solid gray;
+				width: 150px;
+			}
+
+				#tooltip.open {
+					visibility: visible;
+				}
+			
+				#tooltip.closed {
+					visibility: collapse;					
+				}
+			
+			#tooltip .tooltip-header {
+				border-bottom: 1px solid lightgray;
+			}
+			
+			#tooltip .tooltip-value {
+				font-weight: bold;
+				float: right;
+			}
+				</code>
+			</article>
+			
+			<div id="tooltip" class="closed">
+				<div class="tooltip-header">
+					Title
+				</div>
+				<div>
+					Value: <span class="tooltip-value">0</span>
+				</div>
+			</div>
+			
+			<script src="../dist/d3.js" charset="utf-8"></script>
+		<script>
+			// Create some data and display as a chart so that there is 
+			// something for the tooltip to spring from...
+			var data = [
+				{ title: "First", value1: 10 },
+				{ title: "Second", value1: 20 },
+				{ title: "Third", value1: 30 }
+			];
+			var bubbleLayouter = d3.layout.pack()
+									.children(function(d) { return d.data;})
+									.value(function(d) { return d.value1;})
+									.size([600,300])
+									.sort(null)
+									.nodes({ title: "Parent", data: data});
+			var chart = d3.select("#chartArea").append("svg").attr("height", 300).attr("width", 600);
+			chart.selectAll(".nodes").data(data)
+										.enter()
+											.append("circle")
+												.attr("class", "nodes")
+												.attr("cx", function(d) { return d.x;})
+												.attr("cy", function(d) { return d.y;})
+												.attr("r", function(d) { return d.r;})
+												.on("mouseover", tooltipMouseOver)
+												.on("mouseout", tooltipMouseOut);
+			
+			function tooltipMouseOver(d) {
+				var tooltip = document.querySelector("#tooltip");
+				tooltip.className = "open";
+				
+				tooltip.left = d.x + "px";
+				tooltip.top = d.y + "px";
+				
+				tooltip.querySelector(".tooltip-header").innerText=d.title;
+				tooltip.querySelector(".tooltip-value").innerText=d.value1;
+			}
+			
+			function tooltipMouseOut(d) {
+				var tooltip = document.querySelector("#tooltip");
+				tooltip.className = "closed";
+			}
+		</script>
+	</body>
+</html>
