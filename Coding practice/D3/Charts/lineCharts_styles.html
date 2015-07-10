@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+	<head lang="en">
+		<meta charset="utf-8" />
+		<title>Line charts styles</title>
+		<style>
+			
+			.axis path,
+			.axis line {
+				fill: none;
+				stroke: black;
+			}
+			
+			.node {
+				fill: cadetblue;
+				fill-opacity: 0.3;
+				stroke: black;
+			}
+			
+			.line {
+				fill: none;
+				stroke: cadetblue;
+				stroke-width: 3;
+			}
+			
+			#chartArea1 {
+				content:"";
+				width: 800px;
+				height: 300px;
+				outline: 1px dashed gray;
+				display: inline-block;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Line chart styles</h1>
+		<p>All the different line styles available with D3 out of the box.</p>
+		<div id="chartArea"></div>
+		<div>
+			<div id="chartArea1"></div>
+			<input type="range"  min=0 max=10></input>
+		</div>
+		<script src="../dist/d3.js" charset="utf-8"></script>
+		<script>
+			
+			var numDataPts = 20;
+			var height = 200, width = 800;
+			var margin = { left: 40, right: 10, bottom: 20, top: 10};
+			
+			var data = new Array(numDataPts);
+			for(var i = 0; i < data.length; i++) { 
+				data[i] = Math.random() * 10; 
+			}
+			
+			var xScale = d3.scale.linear()
+									.range([0, width - margin.left - margin.right])
+									.domain([0, numDataPts-1]);
+									
+			var yScale = d3.scale.linear()
+									.range([height - margin.top - margin.bottom, 0])
+									.domain([0, 10]);
+			
+			var xAxis = d3.svg.axis().scale(xScale);
+			var yAxis = d3.svg.axis().scale(yScale).orient("left");
+			
+			drawChart("#chartArea");
+			drawChart("#chartArea", "basis");
+			drawChart("#chartArea", "cardinal");
+						
+			function drawChart(el, mode) {
+			
+				var chart = d3.select(el)
+								.append("div")
+								.append("svg")
+									.attr("height", height)
+									.attr("width", width)
+									.append("g")
+										.attr("transform", "translate(" + margin.left + "," + margin.right + ")");
+				
+				chart.append("g").attr("class", "axis").attr("transform", "translate(0, " + (height - margin.top - margin.bottom) + ")")
+							.call(xAxis);
+				chart.append("g").attr("class", "axis").call(yAxis);
+				
+				var line = d3.svg.line()
+									.x(function(d, i) {	return xScale(i); })
+									.y(function(d, i) { return yScale(d); })
+									.interpolate(mode);
+										
+				chart.append("g").datum(data).append("path").attr("d", line).attr("class", "line");
+				
+				chart.selectAll(".node").data(data)
+											.enter().append("circle")
+														.attr("class", "node")
+														.attr("cx", function(d, i) { return xScale(i);})
+														.attr("cy", function(d, i) { return yScale(d);})
+														.attr("r", 5);
+			}
+		</script>
+	</body>
+</html>
