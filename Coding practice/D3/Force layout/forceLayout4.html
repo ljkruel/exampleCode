@@ -1,0 +1,100 @@
+<html>
+<head>
+	<title>Force layout test 2</title>
+	<link rel="stylesheet" type="text/css" href="forceLayout.css"/>
+</head>
+<body>
+	<h1>A Force Layout chart - preventing occulsion of nodes, separating by type</h1>
+	<p>Combining test 2 and three.</p>
+	<p>Each node has it's own charge calculated based on the size property to try to limit oculsion.</p>
+	<p>In this example the node radius is "size" and the colour is "category1"</p>
+	<p>Nodes are layered in the y-axis proportionally to their category.</p>
+	<div id="chartArea"></div>
+	
+	<p>Check out the source. Main code below.
+	<pre class="prettyprint">
+forceLayouter.charge(specialCharge);
+
+function specialCharge(d) {
+    return -(d.size*2);
+}
+
+function forceTick(ev) {
+    var alpha = ev.alpha;
+    nodes.each(function(d) {
+        d.y += alpha * alpha *  50 * d[activeCategory];
+    });
+    nodes.attr("cx", function(d) { return d.x; }).attr("cy", function(d) { return d.y; });
+}
+	</pre>
+	<p>Function specialCharge is called for each node and returns a negative value proportional to the size property of the node. 
+		Note mulitplied by two - this is trial and error...
+	</p>
+	
+	<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+	<script src="../dist/d3.js" charset="utf-8"></script>
+	<script>
+		
+		// Create a load of random data objects.
+		var numDataPts = 100;
+		var numCategory1s = 8;
+		var numCategory2s = 6;
+		
+		var activeCategory = "category1";
+		
+		var data = [];
+		for(var i = 0; i < numDataPts; i++) {
+			data.push({ size: Math.random() * 20, category1: Math.floor(Math.random() * numCategory1s), category2:Math.floor(Math.random() * numCategory2s) });
+		}
+		
+		
+		var width = 400, height = 400;
+		
+		// create the container for the force layout chart
+		var chart = d3.select("#chartArea").append("svg").attr("width", width).attr("height",height);
+		
+		// this scale is used to colour nodes by category.
+		var colourRamp = d3.scale.category10();
+		
+		
+		// create a force layouter 
+		var forceLayouter = d3.layout.force().size([width, height]).nodes(data).on("tick", forceTick);
+		
+		forceLayouter.charge(specialCharge);
+	
+		// draw the nodes
+		nodes = chart.selectAll(".nodes").data(data)
+							.enter()
+								.append("circle")
+									.attr("class", "nodes")
+									.attr("cx", function(d) { return d.x; })
+									.attr("cy", function(d) { return d.y; })
+									.attr("r", function(d) { return d.size ; })
+									.style("stroke", function(d) { return colourRamp(d[activeCategory])})
+									.style("fill", function(d) { return colourRamp(d[activeCategory])});
+									
+									
+		forceLayouter.start();
+		
+		
+		// std d3 tick function copy and pasted from d3js.org
+		function forceTick(ev) {
+			
+			var alpha = ev.alpha;
+			
+			nodes.each(function(d) {
+				
+				d.y += alpha * alpha *  50 * d[activeCategory];
+				
+			});
+
+			 nodes.attr("cx", function(d) { return d.x; }).attr("cy", function(d) { return d.y; });
+		}
+		
+		function specialCharge(d) {
+			return -(d.size*2);
+		}
+	
+	</script>
+</body>	
+</html>

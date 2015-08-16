@@ -12,80 +12,136 @@
 			}
 			
 			.node {
-				fill: cadetblue;
-				fill-opacity: 0.3;
-				stroke: black;
+				fill: white;
+				stroke: cadetblue;
+				stroke-width: 2;
 			}
 			
 			.line {
 				fill: none;
 				stroke: cadetblue;
-				stroke-width: 3;
+				stroke-width: 2;
 			}
 			
-			#chartArea1 {
-				content:"";
-				width: 800px;
-				height: 300px;
-				outline: 1px dashed gray;
+			#tension-control {
+				box-shadow: 0px 0px 4px 4px rgba(0,0,0,0.1);
+				position: fixed;
+				right: 5px;
+				top: 100px;
+				z-index: :99;
+				border-radius: 2px;
+				padding: 2px;
+				background: white;
+			}
+			
+			#tension-control input {
+				width: 200px;
+				vertical-align: middle;
+			}
+			
+			.chart-div {
 				display: inline-block;
 			}
+			
 		</style>
 	</head>
 	<body>
-		<h1>Line chart styles</h1>
+		<h1>D3 Line chart styles</h1>
 		<p>All the different line styles available with D3 out of the box.</p>
+		<p>See <a href="www.d3js.org">D3 Wiki</a> for API details.</p>
+		<p>Use the slider to try different <em>Tension</em> settings and see the effect on the different line types</p>
+		<p>Data points are randomly generated at page load.</p>
+		<div id="tension-control"><label>Tension:<input id="tension" type="range"  min=0 max=100></input></label></div>
 		<div id="chartArea"></div>
-		<div>
-			<div id="chartArea1"></div>
-			<input type="range"  min=0 max=10></input>
-		</div>
+		
 		<script src="../dist/d3.js" charset="utf-8"></script>
 		<script>
 			
+			// Create some random data points to demo the line charts
 			var numDataPts = 20;
-			var height = 200, width = 800;
-			var margin = { left: 40, right: 10, bottom: 20, top: 10};
 			
-			var data = new Array(numDataPts);
-			for(var i = 0; i < data.length; i++) { 
-				data[i] = Math.random() * 10; 
+			var data = [];
+			for(var i = 0; i < numDataPts; i++) { 
+				data.push(Math.random() * 10); 
 			}
 			
-			var xScale = d3.scale.linear()
-									.range([0, width - margin.left - margin.right])
-									.domain([0, numDataPts-1]);
-									
-			var yScale = d3.scale.linear()
-									.range([height - margin.top - margin.bottom, 0])
-									.domain([0, 10]);
+			var initialTension = document.querySelector("#tension").value / 100;
 			
-			var xAxis = d3.svg.axis().scale(xScale);
-			var yAxis = d3.svg.axis().scale(yScale).orient("left");
+			var charts = [
+				{ divId: "#chartArea", lineInterpolateMode: "", displayName: "Default (no interpolate mode given)", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "linear", displayName: "Linear", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "linear-closed", displayName: "Linear-closed", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "step", displayName: "Step", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "step-before", displayName: "Step-before", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "step-after", displayName: "Step-after", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "basis", displayName: "Basis", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "basis-open", displayName: "Basis-open", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "basis-closed", displayName: "Basis-closed", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "bundle", displayName: "Bundle", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "cardinal", displayName: "Cardinal", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "cardinal-open", displayName: "Cardinal-open", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "cardinal-closed", displayName: "Cardinal-closed", chart: null, line: null, tension: initialTension},
+				{ divId: "#chartArea", lineInterpolateMode: "monotone", displayName: "Monotone", chart: null, line: null, tension: initialTension}
+				 
+			];
 			
-			drawChart("#chartArea");
-			drawChart("#chartArea", "basis");
-			drawChart("#chartArea", "cardinal");
-						
-			function drawChart(el, mode) {
 			
-				var chart = d3.select(el)
+			charts.forEach(function(chart){
+				drawLineChart(chart);	
+			});
+			
+			document.querySelector('#tension').addEventListener("change", function(ev) {
+			
+				var tension = document.querySelector("#tension").value / 100;
+			
+			
+				charts.forEach(function(chart){
+					chart.tension = tension;
+					updateChart(chart);	
+				});
+			});
+			
+			function drawLineChart(chartDetails) {
+			
+				
+				var height = 160, width = 600;
+				var margin = { left: 40, right: 10, bottom: 10, top: 10};
+				
+				
+				var xScale = d3.scale.linear()
+										.range([0, width - margin.left - margin.right])
+										.domain([0, numDataPts-1]);
+										
+				var yScale = d3.scale.linear()
+										.range([height - margin.top - margin.bottom, 0])
+										.domain([0, 10]);
+				
+				var xAxis = d3.svg.axis().scale(xScale);
+				var yAxis = d3.svg.axis().scale(yScale).orient("left");
+				
+				var chartDiv = d3.select(chartDetails.divId)
 								.append("div")
+									.attr("class", "chart-div");
+			
+				chartDiv.append("h2").text(chartDetails.displayName).attr("class", "chartHeading");
+			
+				var chart = chartDiv
 								.append("svg")
 									.attr("height", height)
 									.attr("width", width)
 									.append("g")
 										.attr("transform", "translate(" + margin.left + "," + margin.right + ")");
 				
-				chart.append("g").attr("class", "axis").attr("transform", "translate(0, " + (height - margin.top - margin.bottom) + ")")
-							.call(xAxis);
+				//chart.append("g").attr("class", "axis").attr("transform", "translate(0, " + (height - margin.top - margin.bottom) + ")")
+				//			.call(xAxis);
 				chart.append("g").attr("class", "axis").call(yAxis);
 				
 				var line = d3.svg.line()
 									.x(function(d, i) {	return xScale(i); })
 									.y(function(d, i) { return yScale(d); })
-									.interpolate(mode);
-										
+									.interpolate(chartDetails.lineInterpolateMode)
+									.tension(chartDetails.tension);
+				
 				chart.append("g").datum(data).append("path").attr("d", line).attr("class", "line");
 				
 				chart.selectAll(".node").data(data)
@@ -94,6 +150,17 @@
 														.attr("cx", function(d, i) { return xScale(i);})
 														.attr("cy", function(d, i) { return yScale(d);})
 														.attr("r", 5);
+				
+				chartDetails.line = line;										
+				chartDetails.chart = chart;
+				return chart;										
+			}
+			
+			function updateChart(chartDetails) {
+				
+				chartDetails.line.tension(chartDetails.tension);
+				chartDetails.chart.select(".line").attr("d", chartDetails.line);
+				
 			}
 		</script>
 	</body>
