@@ -1,5 +1,5 @@
 <head>
-	<title>Force layout test 1</title>
+	<title>Force layout test 6</title>
 	<link rel="stylesheet" type="text/css" href="forceLayout.css"/>
 	<style>
 		.targetCircles {
@@ -10,7 +10,7 @@
 	</style>
 </head>
 <body>
-	<h1>Force Layout chart with divergent forces</h1>
+	<h1>Force Layout chart with divergent forces plus separating by colour group</h1>
 	<p>Nodes are forced to different points of the screen dependant on their category. The dashed circles show where the nodes should be.</p>
 	<p>In this example the node radius is "size" and the colour is "category1"</p>
 	
@@ -25,29 +25,35 @@ var targetX2 = 900, targetY2 = 200;
 var targetX3 = 300, targetY3 = 600;
 var targetX4 = 600, targetY4 = 400;
 	
-	
 function forceTick(ev) {
-			
+	
 	var alpha = ev.alpha;
+	
+	var targetGravity = 0.3; // this is the gravity of the target areas
 	
 	nodes.each(function(d) {
 		if (d.category2 === 0) {
-			d.y = d.y + (targetY1 - d.y) * (0.1) * alpha * 1;
-			d.x = d.x + (targetX1 - d.x) * (0.1) * alpha * 1;					
+			d.y = d.y + (targetY1 - d.y) * (targetGravity) * alpha * 1;
+			d.x = d.x + (targetX1 - d.x) * (targetGravity) * alpha * 1;					
 		}
 		else if(d.category2 === 1) {
-			d.y = d.y + (targetY2 - d.y) * (0.1) * alpha * 1;
-			d.x = d.x + (targetX2 - d.x) * (0.1) * alpha * 1;
+			d.y = d.y + (targetY2 - d.y) * (targetGravity) * alpha * 1;
+			d.x = d.x + (targetX2 - d.x) * (targetGravity) * alpha * 1;
 		}
 		else if(d.category2 === 2) {
-			d.y = d.y + (targetY3 - d.y) * (0.1) * alpha * 1;
-			d.x = d.x + (targetX3 - d.x) * (0.1) * alpha * 1;
+			d.y = d.y + (targetY3 - d.y) * (targetGravity) * alpha * 1;
+			d.x = d.x + (targetX3 - d.x) * (targetGravity) * alpha * 1;
 		}
 		else {
-			d.y = d.y + (targetY4 - d.y) * (0.1) * alpha * 1;
-			d.x = d.x + (targetX4 - d.x) * (0.1) * alpha * 1;
+			d.y = d.y + (targetY4 - d.y) * (targetGravity) * alpha * 1;
+			d.x = d.x + (targetX4 - d.x) * (targetGravity) * alpha * 1;
 		}
 	});
+	
+	nodes.each(function(d) {
+		d.y += alpha * alpha *  50 * d[activeCategory];
+	});
+	
 	
 	nodes.attr("cx", function(d) { return d.x; }).attr("cy", function(d) { return d.y; });
 }
@@ -137,6 +143,10 @@ function forceTick(ev) {
 					d.y = d.y + (targetY4 - d.y) * (targetGravity) * alpha * 1;
 					d.x = d.x + (targetX4 - d.x) * (targetGravity) * alpha * 1;
 				}
+			});
+			
+			nodes.each(function(d) {
+				d.y += alpha * alpha *  50 * d[activeCategory];
 			});
 			
 			nodes.attr("cx", function(d) { return d.x; }).attr("cy", function(d) { return d.y; });

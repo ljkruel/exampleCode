@@ -5,8 +5,8 @@
 </head>
 <body>
 	<h1>A Force Layout chart with nodes separated by type</h1>
-	<p>In this graph chart, the nodes are forced to separate by category (category shown by colour).</p>
-	<p></p>
+	<p>In this graph chart, the nodes are forced to separate into layers by category (category shown by colour).</p>
+	
 	
 	<div id="chartArea"></div>
 	
@@ -81,7 +81,7 @@ function forceTick(ev) {
 			
 			nodes.each(function(d) {
 				
-				d.y += alpha * alpha *  50 * d[activeCategory];
+				d.y += alpha * alpha *  50 * (d[activeCategory] - 4);
 				
 			});
 		

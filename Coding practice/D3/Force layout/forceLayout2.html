@@ -4,14 +4,17 @@
 	<link rel="stylesheet" type="text/css" href="forceLayout.css"/>
 </head>
 <body>
-	<h1>A Force Layout chart - preventing oculsion of nodes</h1>
-	<p>An example of messing with the charge property per node.</p>
+	<h1>A Force Layout chart - preventing nodes overlapping (fail)</h1>
+	<p>An example of messing with the charge property per node so that their is less white space and nodes do not overlap.
+		Not altogether successful as some nodes still overlap but there is less white space present.
+	</p>
 	<p>Each node has it's own charge calculated based on the size property to try to limit oculsion.</p>
+	<p>Main issue is manual tuning required.</p>
 	<p>In this example the node radius is "size" and the colour is "category1"</p>
 	
 	<div id="chartArea"></div>
 	
-	<p>Check out the source. Main code below.
+	<p>Check out the source. Code of interest below:
 	<pre class="prettyprint">
 forceLayouter.charge(specialCharge);
 

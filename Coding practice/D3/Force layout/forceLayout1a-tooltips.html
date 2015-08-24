@@ -1,11 +1,29 @@
 <html>
 <head>
-	<title>Force layout test 1</title>
-	<link rel="stylesheet" type="text/css" href="forceLayout.css"/> 
+	<title>Force layout test 1 with tooltips</title>
+	<link rel="stylesheet" type="text/css" href="forceLayout.css"/>
+	<style>
+		.tooltip {
+			border: 1px solid black;
+			background: white; 
+			position: absolute; 
+			z-index: 999;
+			width: 300px;
+			content: "";
+			border-radius: 5px;
+			padding: 5px; 	
+			visibility: collapse; 
+		}
+		
+	</style> 
 </head>
 <body>
+	
+	
+	
 	<h1>A Basic Force Layout chart</h1>
 	<p>Example of the simplest force layout chart. One hundred nodes with random values. Each node is a visualisation of an object shown below:</p>
+	<p>Tooltips on hover</p>
 	<pre class="prettyprint">
 {
    size: 17.283,
@@ -14,8 +32,13 @@
 }
 </pre>
 	<p>In this example the node radius is "size" and the colour is "category1"</p>
+		
+	<div id="chartArea">
+		<div class="tooltip" id="chartTooltip"></div>
+	</div>
 	
-	<div id="chartArea"></div>
+	
+	
 	<form>
 		<h4>Control the force layout</h4>
 		<p><label>Number of nodes: <input type="number" id="numberOfNodes" /></label></p>
@@ -73,6 +96,7 @@ function forceTick(ev) {
 			// this scale is used to colour nodes by category.
 			var colourRamp = d3.scale.category10();
 			
+		
 			
 			// create a force layouter 
 			var forceLayouter = d3.layout.force().size([width, height]).nodes(data).on("tick", forceTick);
@@ -87,7 +111,9 @@ function forceTick(ev) {
 										.attr("cy", function(d) { return d.y; })
 										.attr("r", function(d) { return d.size; })
 										.style("stroke", function(d) { return colourRamp(d[activeCategory])})
-										.style("fill", function(d) { return colourRamp(d[activeCategory])});
+										.style("fill", function(d) { return colourRamp(d[activeCategory])})
+										.on("mouseover", tooltipOn)
+										.on("mouseout", tooltipOff);
 										
 										
 			forceLayouter.start();
@@ -97,6 +123,22 @@ function forceTick(ev) {
 			function forceTick(ev) {
 					nodes.attr("cx", function(d) { return d.x; }).attr("cy", function(d) { return d.y; });
 			}
+		}
+		
+		function tooltipOn(d) {
+			
+			var contents = "<p>Size: <span>" + d.size + "</span></p><p>Category one: <span>" + d.category1 + "</span></p><p>Category two: <span>" +  d.category2  + "</span></p>"
+			var tooltip = document.querySelector("#chartTooltip");
+			
+			tooltip.innerHTML = contents;
+			tooltip.style.top = (tooltip.parentElement.offsetTop + d.y - d.size - tooltip.clientHeight) + "px";
+			tooltip.style.left = (tooltip.parentElement.offsetLeft +  d.x) + "px";
+			tooltip.style.visibility = "visible";
+		}
+		
+		function tooltipOff(ev) {
+						var tooltip = document.querySelector("#chartTooltip");
+			tooltip.style.visibility = "collapse";
 		}
 		
 		/////////////////////////////////////////////////////////////////////////////
