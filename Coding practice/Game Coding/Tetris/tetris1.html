@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tetris 1 - drawing the tetroids</title>
+	<style>
+		svg {
+			
+		}
+		
+		.gameGrid {
+			fill: none;
+			stroke: cadetblue;
+			stroke-dasharray: 5,5;
+		}
+		
+		.L {
+			fill: white;	
+			stroke: seagreen;
+		}
+	</style>
+</head>
+<body>
+	<h1>Tetris 1</h1>
+	<p>Coding Tetris as an HTML5 practice.</p>
+	<p>This version using SVG to render the play area.</p>
+	<div id="gameArea">
+		<svg></svg>
+	</div>
+	
+	
+	<script src="../../d3/dist/d3.js" charset="utf-8"></script>
+	<script>
+	
+		var	gameGridCols = 10, //Number of columns 
+			gameGridRows = 20, // Number of rows
+			gameGridHeight = 600, // pixel height of game area
+			gameGridWidth = gameGridHeight * (gameGridCols / gameGridRows); // pixel width of game area - grid of squares
+	
+		// initialize an empty game grid 
+		var gameGrid = new Array(gameGridCols);
+		gameGrid.forEach(function(d) { d.push(new Array(gameGridRows))});
+			
+		var gameSurface = document.querySelector("#gameArea svg");
+		
+		gameSurface = d3.select("#gameArea svg").attr("width", gameGridWidth).attr("height", gameGridHeight);
+	
+		gameSurface.append("rect").attr("class","gameGrid").attr("x", 0).attr("y", 0).attr("width", gameGridWidth).attr("height", gameGridHeight);
+		
+		gameSurface.xScale = function(x) { return x * (gameGridWidth / gameGridCols); };
+		gameSurface.yScale = function(y) { return y * (gameGridHeight / gameGridRows); };
+		
+		var shape = {
+			row: 3,
+			col: 3,
+			maxSize: 4,
+			class: "L",
+			shape: [[0,1,1,1],[0,0,0,1],[0,0,0,0],[0,0,0,0]]
+		
+		};
+		
+		addTedriod(shape);
+		
+		function addTedriod(shape) {
+			for(var y = 0; y < shape.maxSize; y++) {
+				for(var x = 0; x < 4; x++) {
+					if(shape.shape[x][y]) {
+						gameSurface.append("rect")
+							.attr("class", shape.class)
+							.attr("x", gameSurface.xScale(shape.col + x))
+							.attr("y", gameSurface.yScale(shape.row + y))
+							.attr("height", (gameGridHeight / gameGridRows))
+							.attr("width", (gameGridWidth / gameGridCols))
+					}
+				}
+			}
+		}
+	</script>
+
+
+</body>
+</html>

@@ -113,7 +113,7 @@ function specialCharge(d) {
 		});
 		
 		// Create a load of random data objects.
-		var numDataPts = 500;
+		var numDataPts = 30;
 		var numCategory1s = 4;
 		var numCategory2s = 2;
 		var width = 1200, height = 800;
@@ -122,19 +122,32 @@ function specialCharge(d) {
 		
 		var data = [];
 		for(var i = 0; i < numDataPts; i++) {
-			data.push({ size: Math.random() * 20, category1: Math.floor(Math.random() * 4), category2:Math.floor(Math.random() * 4) });
+			data.push({ size: Math.random() * 50, category1: Math.floor(Math.random() * 4), category2:Math.floor(Math.random() * 4) });
 		}
-		// As there are so many nodes, initialize the starting y position to help the first layout 
-		data.forEach(function(d) { d.y = height/2 + (50 * (d[activeCategory] - d[activeCategory]/2)) });
+		
+		var targetX1 = 300, targetY1 = 200;
+		var targetX2 = 900, targetY2 = 200;
+		
+		
+		
+		var packLayout = d3.layout.pack().value(function(d) { return d.size; }).sort(null).size([width, height]);
+		packLayout({ children: data });
+		data.forEach(function(d) {
+			d.targetX = d.x;
+			d.targetY = d.y;
+			d.y = height/2 + (50 * (d[activeCategory] - d[activeCategory]/2))
+			d.x = (Math.random() * 400) + (width /2) - 200;
+		});
 		
 		
 		// calculate the target locations for each category; note, in this example, three columns and number of rows depends on number of
 		// categories. in this example, two rows.
 		
-		var targetX1 = 300, targetY1 = 200;
-		var targetX2 = 900, targetY2 = 200;
-		var targetX3 = 300, targetY3 = 600;
-		var targetX4 = 600, targetY4 = 400;
+		
+		
+		
+		
+		
 		
 		
 		
@@ -145,7 +158,7 @@ function specialCharge(d) {
 		var chart = d3.select("#chartArea").append("svg").attr("width", width).attr("height",height);
 		
 		// draw target circles on chart to show where the clusters should be
-		var targets = [[targetX1,targetY1],[targetX2,targetY2],[targetX3,targetY3],[targetX4,targetY4]];
+		var targets = [[targetX1,targetY1],[targetX2,targetY2]];
 		chart.selectAll(".targetCircles").data(targets).enter().append("circle").attr("class", "targetCircles").attr("cx", function(d) { return d[0];} ).attr("cy", function(d) { return d[1];} ).attr("r", 100 )
 		
 		
@@ -172,35 +185,31 @@ function specialCharge(d) {
 												
 		function setupNormalLayout() {
 			forceLayouter.charge(specialCharge);		
-			forceLayouter.gravity(0.3);			
+			forceLayouter.gravity(0.0);			
 			
-			return function(alpha) { } // intentionally left black};
+			return function(alpha) { 
+				var targetGravity = 0.3; // the gravity of the target locations
+				nodes.each(function(d) {
+					
+						d.y = d.y + (targetY1 - d.y) * (targetGravity) * alpha * 1;
+						d.x = d.x + (targetX1 - d.x) * (targetGravity) * alpha * 1;					
+					
+				});
+			} 
 		}
 		
 		function setupSplitLayout() {
-			forceLayouter.charge(specialCharge);		
+			forceLayouter.charge(0);		
 			forceLayouter.gravity(0.0);			
 			
 			return function(alpha) {
 				var targetGravity = 0.3; // the gravity of the target locations
 			
 				nodes.each(function(d) {
-					if (d.category2 === 0) {
-						d.y = d.y + (targetY1 - d.y) * (targetGravity) * alpha * 1;
-						d.x = d.x + (targetX1 - d.x) * (targetGravity) * alpha * 1;					
-					}
-					else if(d.category2 === 1) {
-						d.y = d.y + (targetY2 - d.y) * (targetGravity) * alpha * 1;
-						d.x = d.x + (targetX2 - d.x) * (targetGravity) * alpha * 1;
-					}
-					else if(d.category2 === 2) {
-						d.y = d.y + (targetY3 - d.y) * (targetGravity) * alpha * 1;
-						d.x = d.x + (targetX3 - d.x) * (targetGravity) * alpha * 1;
-					}
-					else {
-						d.y = d.y + (targetY4 - d.y) * (targetGravity) * alpha * 1;
-						d.x = d.x + (targetX4 - d.x) * (targetGravity) * alpha * 1;
-					}
+					
+						d.y = d.y + (d.targetY - d.y) * (targetGravity) * alpha * 1;
+						d.x = d.x + (d.targetX - d.x) * (targetGravity) * alpha * 1;					
+					
 				});		
 			};
 		}

@@ -172,14 +172,14 @@ function specialCharge(d) {
 		function setupNormalLayout() {
 			forceLayouter.charge(specialCharge);		
 			forceLayouter.gravity(0.3);			
-			
+			forceLayouter.chargeDistance(Number.POSITIVE_INFINITY);
 			return function(alpha) { } // intentionally left black};
 		}
 		
 		function setupSplitLayout() {
 			forceLayouter.charge(specialCharge);		
 			forceLayouter.gravity(0.0);			
-			
+			forceLayouter.chargeDistance(250);
 			return function(alpha) {
 				var targetGravity = 0.3; // the gravity of the target locations
 			

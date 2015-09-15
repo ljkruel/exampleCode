@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tetris on canvas</title>
+	<style>
+		svg {
+			
+		}
+		
+		.gameGrid {
+			fill: none;
+			stroke: cadetblue;
+			stroke-dasharray: 5,5;
+		}
+		
+		.L {
+			fill: white;	
+			stroke: seagreen;
+		}
+		
+		canvas {
+			outline: 1px dashed gray
+		}
+	</style>
+</head>
+<body>
+	<h1>Tetris on canvas</h1>
+	<p>Coding Tetris as an HTML5 practice.</p>
+	<p>This version using canvas to render the play area. </p>
+	<p>Uses a std game loop to redraw the game at ~30fps! See xxx for a tetris on canvas game that is event driven.</p>
+	
+	<p>Resources used:</p>
+	<ul>
+		<li><a href="http://www.w3.org/TR/2dcontext/">W3C - 2d Context documentation</a></li>
+		<li><a href="http://diveintohtml5.info/canvas.html">HTML5 Canvas tutorial</a></li>
+		<li><a href="http://www.html5rocks.com/en/tutorials/canvas/notearsgame/">html5rocks - quick canvas game tutorial</a></li>
+		<li><a href="http://www.html5rocks.com/en/tutorials/canvas/performance/">html5rocks - canvas performance tips</a></li>
+	</ul>
+	<canvas  id="gameArea"></canvas>
+	<p>Code not optimised at this time.</p>
+	<p>Known issues:</p>
+	<ul>
+		<li>Collision detection with 4x1 block on left and right borders</li>
+		<li>Rotation with 4x1 block on left and right borders</li>
+	</ul>
+	
+	<script>
+
+		var fps = 30; // animation timer frames per second
+		
+		var	gameGridCols = 12, //Number of columns on screen 
+			gameGridRows = 21, // Number of rows on screen
+			gameGridHeight = 400, // pixel height of game area
+			gameGridWidth = gameGridHeight * (gameGridCols / gameGridRows); // pixel width of game area - grid of squares
+	
+		var gameGridCellHeight = gameGridHeight / gameGridRows,
+			gameGridCellWidth = gameGridWidth / gameGridCols;
+		
+		var initialTimeBetweenDrops = 500; // 2 seconds
+		var currentTimeBetweenDrops = initialTimeBetweenDrops;
+		var timeOfLastDrop;
+		
+		var lastKeyPressed = null;
+		
+		
+		var gameSurface = document.querySelector("#gameArea").getContext("2d");	
+		var gameGrid;
+	
+		
+		function initialize() {
+			var gameArea = document.querySelector("#gameArea");
+			gameArea.width = gameGridWidth;
+			gameArea.height = gameGridHeight;
+		
+			// initialize an empty game grid - 
+			// a zero indicates no block present in the cell, a one or other number indicates a block is present.
+			// note, extra borders on left and right and bottom for collision detection
+			//
+			// 100000000001
+			// 100000000001
+			// 100000000001
+			// 100000000001
+			// 100000000001
+			// 111111111111
+			//
+			gameGrid = new Array(gameGridCols + 2);
+			
+			for(var x = 0; x < gameGridCols; x++) {
+				gameGrid[x] = new Array(gameGridRows);
+			
+				for(var y = 0; y < gameGridRows; y++) {
+					if(x == 0  || x == gameGridCols-1)
+						gameGrid[x][y] = 1;
+					else if(y == gameGridRows-1) gameGrid[x][y] = 1;
+					else gameGrid[x][y] = 0;	
+				}
+			}
+			
+			tetroid.reset();
+
+			// start imediately!
+			timeOfLastDrop = Date.now();	
+			
+			// handle user key press
+			document.addEventListener("keydown", keypress);
+		
+			// start the game looping forever
+			setInterval(gameLoop, 1000/fps);
+					
+		}
+		
+		// ultra standard game loop
+		function gameLoop() {
+			
+			update();
+			draw();
+			
+		}
+		
+		
+		
+		
+		var tetroid = {
+			x: 5,
+			y: 0,
+			rows: 3,
+			cols: 3,
+			shape: function() { return this.shapes[this.currentShape];},
+			currentShape: 1,
+			shapes: [],
+			rotate: function(clockwise) {
+				var nextShape = this.currentShape;
+				if(clockwise) {
+					nextShape++;
+					if (nextShape >= this.shapes.length) nextShape = 0;
+				}
+				else {
+					nextShape--;
+					if(nextShape < 0 ) nextShape = shapes.length - 1;	
+				} 
+				
+				this.currentShape = nextShape;
+				
+				if(collisionDetection(this.x, this.y, this))
+				{
+					// rotated piece collides - move left or reverse if that fails.
+					if(collisionDetection(this.x - 1, this.y, this)) {
+						this.rotate(!clockwise) 
+ 					}
+					else {
+						this.x = this.x - 1;
+					}
+				}
+				
+			},
+			draw: function() {
+				gameSurface.fillStyle = "red";
+				for(var x=0; x < this.cols; x++) {
+					for(var y = 0; y < this.rows; y++) {
+						if(this.shape()[x][y] !=0)
+						gameSurface.fillRect(gameGridCellWidth*(this.x + x), gameGridCellHeight*(this.y - this.rows  + y), gameGridCellWidth, gameGridCellHeight);	
+					}
+				}
+				
+				gameSurface.beginPath();
+				gameSurface.moveTo(gameGridCellWidth*(this.x), gameGridCellHeight*(this.y));
+				gameSurface.lineTo(gameGridCellWidth*(this.x + this.rows), gameGridCellHeight*(this.y - 0));
+				gameSurface.lineTo(gameGridCellWidth*(this.x + this.rows), gameGridCellHeight*(this.y- this.cols));
+				gameSurface.lineTo(gameGridCellWidth*(this.x + 0), gameGridCellHeight*(this.y- this.cols));
+				gameSurface.lineTo(gameGridCellWidth*(this.x + 0), gameGridCellHeight*(this.y- 0));
+				gameSurface.stroke();
+			},
+			// put the piece back at the top of the game and randomise the shape
+			reset: function() {
+				var randomShape = Math.floor(Math.random()*this.allShapes.length);
+				var nextShape = this.allShapes[randomShape];
+				
+				this.rows = nextShape.shapeSize;
+				this.cols = nextShape.shapeSize;
+				this.shapes = nextShape.shapeArray;
+				this.x = 5;
+				this.y = 0;				
+				this.currentShape=0;
+			},
+			allShapes: [
+				{ // 4x1 bar shape 
+					shapeSize: 4,
+					colour: 2, 
+					shapeArray:  
+						[
+							[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+							[[0,0,0,1],[0,0,0,1],[0,0,0,1],[0,0,0,1]] 
+						]
+				},
+				{ // L shape 
+					shapeSize: 3, 
+					colour: 3,
+					shapeArray:  
+						[
+							[[1,1,1],[0,0,1],[0,0,0]],
+							[[0,1,1],[0,1,0],[0,1,0]],
+							[[1,0,0],[1,1,1],[0,0,0]],
+							[[0,0,1],[0,0,1],[0,1,1]] 
+						]
+				},
+				{ // reverse L shape 
+					shapeSize: 3, 
+					colour: 4,
+					shapeArray:  
+						[
+							[[1,1,1],[1,0,0],[0,0,0]],
+							[[0,1,0],[0,1,0],[0,1,1]],
+							[[0,0,1],[1,1,1],[0,0,0]],
+							[[0,1,1],[0,0,1],[0,0,1]] 
+						]
+				},
+				{ // T shape
+					shapeSize: 3, 
+					colour: 5,
+					shapeArray:  
+						[
+							[[1,1,1],[0,1,0],[0,0,0]],
+							[[0,1,0],[0,1,1],[0,1,0]],
+							[[0,1,0],[1,1,1],[0,0,0]],
+							[[0,0,1],[0,1,1],[0,0,1]] 
+						]
+				},
+				{ // s shape
+					shapeSize: 3, 
+					colour: 6,
+					shapeArray:  
+						[
+							[[1,1,0],[0,1,1],[0,0,0]],
+							[[0,0,1],[0,1,1],[0,1,0]] 
+						]
+				},
+				{ // reverse s shape
+					shapeSize: 3, 
+					colour: 7,
+					shapeArray:  
+						[
+							[[0,1,1],[1,1,0],[0,0,0]],
+							[[0,1,0],[0,1,1],[0,0,1]] 
+						]
+				},
+				{ // o shape
+					shapeSize: 2, 
+					colour: 8,
+					shapeArray:  
+						[
+							[[1,1],[1,1]] 
+						]
+				}
+			]
+		};
+		
+		initialize();
+		
+		function collisionDetection(targetX, targetY, tetroid) {
+			
+			
+			for(var x = 0; x <tetroid.cols; x++) {
+				for(var y = 0; y < tetroid.rows; y++) {
+					// check that the future position of the tetroid is not going to be on an existion square - or off the game grid...
+					if( (targetY + y - tetroid.rows >=0) &&
+						(gameGrid[targetX + x][targetY + y - tetroid.rows] != 0) && 
+						(tetroid.shape()[x][y] != 0)) {
+							
+						return true;
+					}		
+				}
+			}
+			
+			
+			
+			return false;
+		}
+		
+		
+		// function moves the piece if the user has pressed a key or if it is time to drop the piece.
+		// also handles rotate key
+		// also handles collision detection and piece hitting the bottom of the screen etc
+		function update() {
+			var targetX = tetroid.x; // by default the x coord of the piece does not move
+			var targetY = tetroid.y; // by default the y coord of the piece does not move
+			
+			// handle key press movement
+			if(lastKeyPressed && lastKeyPressed=="Right") {
+				targetX = tetroid.x+1;
+			}
+			else if(lastKeyPressed && lastKeyPressed=="Left") {
+				targetX = tetroid.x-1;
+			}
+				
+			if(!collisionDetection(targetX, tetroid.y, tetroid)) {
+				tetroid.x = targetX;
+			}
+			
+			if(lastKeyPressed && lastKeyPressed =="Up") {
+				tetroid.rotate(true);
+			}				
+			
+			// handle drop
+			var timeNow = Date.now();
+			if((timeNow - timeOfLastDrop) >= currentTimeBetweenDrops) {
+				timeOfLastDrop = timeNow;
+				targetY = tetroid.y+1;
+			}
+			
+			if(lastKeyPressed=="Down") targetY = tetroid.y+1;
+			
+			if(collisionDetection(tetroid.x, targetY, tetroid)) {
+				// has reached the bottom and stop
+				// add piece to the game grid
+				//gameGrid[tetroid.x][tetroid.y] = 2;
+				gameGrid.addTetroid(tetroid);	
+				
+				gameGrid.checkForCompleteRows();		
+				
+				// reset the current tetroid...
+				tetroid.reset();
+			}
+			else {
+				tetroid.y = targetY;
+			}
+			
+						
+			lastKeyPressed = null; // reset the key press buffer
+
+		}
+		
+		function draw() {
+				gameSurface.clearRect(0,0, gameGridWidth, gameGridHeight);
+				
+				gameGrid.draw();
+				tetroid.draw();				
+				
+		}
+		
+		// Add the tetroid piece to the background
+		gameGrid.addTetroid = function(tetroid) {
+			for(var x=0; x < tetroid.cols; x++) {
+				for(var y = 0; y < tetroid.rows; y++) {
+					if(tetroid.shape()[x][y] !=0)
+						gameGrid[x + tetroid.x][y + tetroid.y -tetroid.rows] = tetroid.shape()[x][y];
+				}
+			}
+			
+		}
+		
+		// Check for complete rows. If there are, remove them and move the remaining blocks down as required
+		gameGrid.checkForCompleteRows = function() {
+			for(var y = 0; y < gameGridRows; y++) {
+			
+				var gapFound = false;	
+				
+				// I could start checking for complete rows only for the height and row of the tetroid piece		
+				for(var x = 0; x < gameGridCols; x++) {
+					if(gameGrid[x][y] == 0) {
+						gapFound = true;
+						break;
+					}
+				}
+				
+				if(gapFound == false) {
+					// found a complete row
+					
+					// todo - animate this	
+					
+					// drop all rows above down one
+					for(var y2=y; y2 > 0; y2--) {	
+						for(var x = 1; x < gameGridCols-1; x++) {
+							gameGrid[x][y2] = gameGrid[x][y2-1];
+						}
+					}
+				}
+			}
+		}
+		
+		// draw the game grid background
+		gameGrid.draw = function() {
+			gameSurface.fillStyle = "cadetblue";
+			for(var x = 0; x < gameGridCols; x++) {
+				for(var y = 0; y < gameGridRows; y++) {
+					if(gameGrid[x][y] != 0)
+						gameSurface.fillRect(gameGridCellWidth*(x), gameGridCellHeight*(y), gameGridCellWidth, gameGridCellHeight);
+				}
+			}
+		
+		}
+		
+		
+		function keypress(ev) {
+			if(ev.key == "Up" || ev.key ==  "Down"  || ev.key ==  "Left"  || ev.key ==  "Right") {
+				lastKeyPressed = ev.key;
+				ev.preventDefault(); // necessary to stop the screen moving...
+			}
+		}
+		
+				
+		
+	</script>
+</body>
+</html>
